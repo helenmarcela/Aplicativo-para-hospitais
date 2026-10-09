@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f8f7">
+  <title>VittaCare — cuidado conectado</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #16332f;
+      --muted: #60736f;
+      --green: #176b5b;
+      --green-dark: #105346;
+      --mint: #e4f2ed;
+      --line: #dce7e2;
+      --paper: #fff;
+      --wash: #f5f8f7;
+      --coral: #e98e70;
+      --icon-ink: #0e493f;
+      --record-icon-ink: #07372f;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: var(--wash); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { min-height: 100vh; overflow: hidden; }
+    header { max-width: 1200px; margin: auto; padding: 26px 32px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: -.04em; font-size: 21px; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; background: var(--green); color: white; }
+    .brand-mark svg { width: 20px; }
+    .top-note { color: var(--muted); font-size: 13px; }
+    main { max-width: 1200px; margin: auto; padding: 35px 32px 80px; }
+    .hero { display: grid; grid-template-columns: 1.02fr .98fr; align-items: center; gap: 70px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--green); text-transform: uppercase; letter-spacing: .12em; font-size: 11px; font-weight: 800; }
+    .eyebrow:before { content: ''; width: 20px; height: 2px; background: var(--coral); }
+    h1 { max-width: 570px; margin: 18px 0 17px; font-size: clamp(42px, 5.4vw, 68px); line-height: 1.03; letter-spacing: -.065em; font-weight: 650; }
+    h1 em { color: var(--green); font-style: normal; }
+    .intro { max-width: 490px; color: var(--muted); font-size: 17px; line-height: 1.7; }
+    .access-note { display: flex; align-items: flex-start; gap: 12px; max-width: 480px; margin-top: 27px; padding: 15px 17px; border: 1px solid #d2e6de; border-radius: 14px; background: #edf6f2; color: #315950; font-size: 13px; line-height: 1.55; }
+    .access-note svg { flex: 0 0 19px; margin-top: 1px; }
+    .access-note strong { color: var(--ink); }
+    .visual { min-height: 400px; position: relative; display: grid; place-items: center; }
+    .visual:before { content: ''; position: absolute; width: min(390px, 90%); aspect-ratio: 1; border-radius: 50%; background: #e5f0eb; }
+    .visual:after { content: ''; position: absolute; width: 290px; height: 290px; border: 1px solid #c8ddd5; border-radius: 50%; }
+    .cross { z-index: 1; width: 220px; height: 220px; border-radius: 52px; transform: rotate(-8deg); display: grid; place-items: center; background: var(--green); box-shadow: 0 25px 60px #176b5b38; }
+    .cross svg { width: 114px; height: 114px; transform: rotate(8deg); color: #fff; }
+    .float-card { position: absolute; z-index: 2; display: flex; gap: 11px; align-items: center; padding: 13px 16px; border-radius: 14px; background: white; box-shadow: 0 12px 32px #153c3020; font-size: 12px; font-weight: 700; }
+    .float-card small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; font-weight: 500; }
+    .float-card.one { top: 48px; left: 3%; }.float-card.two { right: 0; bottom: 62px; }
+    .mini-icon { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; background: #cfe4db; color: var(--icon-ink); }
+    .mini-icon svg { width: 17px; height: 17px; }
+    .section-head { margin: 85px 0 26px; display: flex; justify-content: space-between; align-items: end; gap: 24px; }
+    .section-head h2 { margin: 9px 0 0; font-size: 30px; letter-spacing: -.04em; }
+    .section-head p { margin: 0 0 3px; color: var(--muted); font-size: 13px; }
+    .workspace { display: grid; grid-template-columns: .83fr 1.17fr; border: 1px solid var(--line); border-radius: 22px; overflow: hidden; background: var(--paper); box-shadow: 0 18px 55px #2243370a; }
+    .info-panel { padding: 36px; background: #edf5f1; }
+    .info-panel h3 { margin: 0 0 10px; font-size: 21px; letter-spacing: -.03em; }
+    .info-panel > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .benefits { margin-top: 29px; display: grid; gap: 20px; }
+    .benefit { display: flex; gap: 12px; align-items: flex-start; font-size: 13px; line-height: 1.45; }
+    .benefit .mini-icon { flex: 0 0 34px; }
+    .benefit strong { display: block; margin-bottom: 3px; }
+    .benefit span { color: var(--muted); }
+    .form-panel { padding: 0 38px 36px; }
+    .tabs { display: flex; gap: 27px; border-bottom: 1px solid var(--line); }
+    .tab { position: relative; padding: 22px 1px 17px; border: 0; background: none; color: #82918d; font-size: 14px; font-weight: 650; }
+    .tab[aria-selected="true"] { color: var(--green); }
+    .tab[aria-selected="true"]:after { content: ''; position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--green); }
+    .tab-panel { padding-top: 25px; }
+    .tab-panel h3 { margin: 0 0 6px; font-size: 20px; letter-spacing: -.03em; }
+    .form-lead { margin: 0 0 22px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 14px; }
+    .field { display: grid; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: 12px; font-weight: 700; }
+    input, select { width: 100%; height: 43px; padding: 0 12px; border: 1px solid #d7e2dd; border-radius: 9px; outline: 0; background: white; color: var(--ink); font-size: 13px; }
+    input::placeholder { color: #a4b0ac; }
+    input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px #176b5b16; }
+    .helper { color: #71827d; font-size: 10px; line-height: 1.4; }
+    .terms { display: flex; align-items: flex-start; gap: 9px; margin: 19px 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .terms input { width: 15px; height: 15px; margin: 0; flex: 0 0 15px; accent-color: var(--green); }
+    .primary { width: 100%; height: 46px; border: 0; border-radius: 10px; color: white; background: var(--green); font-size: 13px; font-weight: 750; transition: background .15s, transform .15s; }
+    .primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .login-prompt { margin: 17px 0 0; text-align: center; color: var(--muted); font-size: 12px; }
+    .text-button { padding: 0; border: 0; color: var(--green); background: none; font-weight: 750; }
+    .notice { display: none; margin-top: 12px; padding: 11px 13px; border-radius: 9px; background: var(--mint); color: var(--green-dark); font-size: 12px; line-height: 1.5; }
+    .notice.show { display: block; }
+    .about-copy { padding: 8px 0 2px; color: var(--muted); font-size: 14px; line-height: 1.75; }
+    .about-copy strong { color: var(--ink); }
+    .dashboard { margin-top: 70px; padding: 30px; border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 18px 55px #2243370a; }
+    .dash-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 23px; }
+    .dash-heading h2 { margin: 8px 0 5px; font-size: 28px; letter-spacing: -.04em; }
+    .dash-heading p { margin: 0; color: var(--muted); font-size: 13px; }
+    .live-label { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border-radius: 30px; background: #edf6f2; color: var(--green); font-size: 11px; font-weight: 750; white-space: nowrap; }
+    .live-label:before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #37a477; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; }
+    .stat { min-height: 104px; padding: 17px; border: 1px solid var(--line); border-radius: 13px; }
+    .stat-label { color: var(--muted); font-size: 12px; }
+    .stat-value { margin-top: 8px; font-size: 29px; line-height: 1; font-weight: 750; letter-spacing: -.04em; }
+    .stat-value small { color: #84938e; font-size: 14px; font-weight: 600; letter-spacing: 0; }
+    .stat.urgent .stat-value { color: #c24f42; }
+    .dash-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; margin-top: 18px; }
+    .dash-card { border: 1px solid var(--line); border-radius: 15px; overflow: hidden; }
+    .card-heading { display: flex; align-items: center; justify-content: space-between; padding: 17px 18px; border-bottom: 1px solid var(--line); }
+    .card-heading h3 { margin: 0; font-size: 15px; }
+    .card-heading span { color: var(--muted); font-size: 11px; }
+    .patient-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 15px 18px; border-bottom: 1px solid #edf1ef; }
+    .patient-row:last-child { border-bottom: 0; }
+    .patient-name { font-size: 13px; font-weight: 700; }
+    .patient-meta { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .record-link { border: 0; padding: 7px 9px; border-radius: 8px; background: #cfe4db; color: var(--record-icon-ink); font-size: 11px; font-weight: 750; }
+    .severity { display: inline-block; margin-left: 7px; padding: 3px 7px; border-radius: 20px; background: #fff0ed; color: #bd5145; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    .room-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 14px 18px; border-bottom: 1px solid #edf1ef; font-size: 12px; }
+    .room-row:last-child { border: 0; }
+    .room-state { color: #a15c2f; font-size: 10px; font-weight: 750; }
+    .room-state.free { color: var(--green); }
+    .surgery-tabs { display: flex; gap: 7px; padding: 11px 14px 0; border-bottom: 1px solid var(--line); }
+    .surgery-tab { padding: 9px 11px; border: 0; border-radius: 8px 8px 0 0; background: transparent; color: var(--muted); font-size: 11px; font-weight: 750; }
+    .surgery-tab[aria-pressed="true"] { background: #e4f2ed; color: var(--green-dark); }
+    .reservation-form { padding: 15px; }
+    .reservation-form .fields { gap: 12px; }
+    .reservation-form .field { min-width: 0; }
+    .reservation-form .primary { margin-top: 15px; }
+    .reservation-list { display: grid; gap: 8px; padding: 0 15px 15px; }
+    .reservation-confirmation { padding: 11px 12px; border: 1px solid #cfe4db; border-radius: 9px; background: #f3f8f5; color: var(--green-dark); font-size: 11px; line-height: 1.5; }
+    .chat-box { margin-top: 18px; padding: 18px; border-radius: 15px; background: #edf5f1; }
+    .chat-box h3 { margin: 0 0 5px; font-size: 15px; }
+    .chat-box p { margin: 0 0 12px; color: var(--muted); font-size: 12px; }
+    .chat-warning { margin: 0 0 12px; padding: 9px 11px; border-left: 3px solid #bc7753; background: #fff7f1; color: #70462f; font-size: 11px; line-height: 1.5; }
+    .chat-form { display: flex; gap: 9px; }
+    .chat-form input { flex: 1; }
+    .chat-form button { padding: 0 16px; border: 0; border-radius: 9px; background: var(--green); color: #fff; font-size: 12px; font-weight: 700; }
+    .chat-notice { display: none; padding-top: 10px; color: var(--green-dark); font-size: 12px; }
+    .chat-notice.show { display: block; }
+    .chat-messages { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
+    .chat-message { padding: 10px 12px; border: 1px solid #d9e8e1; border-radius: 10px; background: #fff; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+    .chat-message time { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .demo-stamp { color: var(--muted); font-size: 11px; }
+    .logout-button { padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--green-dark); font-size: 11px; font-weight: 700; }
+    .record-audit { display: block; margin-top: 8px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .demo-note { margin: 14px 0 0; color: #84938e; font-size: 10px; line-height: 1.5; }
+    #painel-entrar { max-width: 510px; margin: 0 auto; padding: 34px 30px; border: 1px solid #e3ece8; border-radius: 18px; background: linear-gradient(145deg, #fff 45%, #f1f8f5); box-shadow: 0 14px 38px #173a3010; }
+    .login-emblem { width: 45px; height: 45px; margin-bottom: 18px; display: grid; place-items: center; border-radius: 15px; background: #cfe4db; color: var(--icon-ink); }
+    .login-emblem svg { width: 24px; height: 24px; }
+    .login-security { display: flex; align-items: center; gap: 7px; margin-top: 20px; color: #6e817b; font-size: 10px; }
+    .login-security svg { width: 14px; height: 14px; color: var(--icon-ink); }
+    .page-tabs { max-width: 720px; margin: 0 auto 38px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    .page-tab { padding: 10px 15px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .page-tab[aria-current="page"] { border-color: var(--green); background: var(--green); color: #fff; }
+    .test-panel { max-width: 660px; margin: 42px auto; padding: 30px; border: 1px solid var(--line); border-radius: 18px; background: #fff; }
+    .record-dialog { width: min(680px, calc(100% - 28px)); max-height: 85vh; overflow: auto; padding: 25px; border: 1px solid var(--line); border-radius: 18px; color: var(--ink); box-shadow: 0 24px 90px #102f2870; }
+    .record-dialog::backdrop { background: #102f2880; backdrop-filter: blur(3px); }
+    .record-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .record-dialog-head h2 { margin: 7px 0 0; font-size: 24px; }
+    .record-close { width: 35px; height: 35px; border: 0; border-radius: 50%; background: #cfe4db; color: var(--record-icon-ink); font-size: 24px; }
+    .record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 17px; }
+    .record-item { padding: 14px; border: 1px solid transparent; border-radius: 10px; background: var(--wash); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease; }
+    .record-item:hover { transform: translateY(-3px); border-color: #b8d2c8; background: #f8fbf9; box-shadow: 0 8px 18px #173a3014; }
+    .record-item.full { grid-column: 1 / -1; }
+    .record-item dt { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--muted); font-size: 14px; font-weight: 750; text-transform: uppercase; letter-spacing: .05em; }
+    .record-item dt::before { content: "✚"; color: var(--record-icon-ink); font-size: 14px; line-height: 1; }
+    .record-item dd { margin: 0; font-size: 16px; line-height: 1.65; }
+    .record-observations { width: 100%; min-height: 104px; padding: 12px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font: inherit; font-size: 15px; }
+    .record-save { margin-top: 8px; padding: 8px 11px; border: 0; border-radius: 8px; background: var(--record-icon-ink); color: #fff; font-size: 11px; font-weight: 700; }
+    .record-dialog .eyebrow { color: var(--record-icon-ink); }
+    body[data-page="login"] .hero, body[data-page="login"] .section-head, body[data-page="login"] .info-panel, body[data-page="login"] .tabs, body[data-page="login"] #painel-cadastro, body[data-page="login"] #painel-sobre, body[data-page="login"] .dashboard, body[data-page="login"] .test-panel { display: none; }
+    body[data-page="login"] .workspace { display: block; max-width: 570px; margin: 38px auto 20px; }
+    body[data-page="login"] .form-panel { padding: 0; }
+    body[data-page="login"] #painel-entrar { display: block; }
+    body[data-page="cadastro"] .hero, body[data-page="cadastro"] .dashboard, body[data-page="cadastro"] .test-panel, body[data-page="cadastro"] #painel-entrar, body[data-page="cadastro"] #painel-sobre { display: none; }
+    body[data-page="informacoes"] .section-head, body[data-page="informacoes"] .dashboard, body[data-page="informacoes"] .test-panel, body[data-page="informacoes"] #painel-entrar, body[data-page="informacoes"] #painel-cadastro { display: none; }
+    body[data-page="painel"] .hero, body[data-page="painel"] .section-head, body[data-page="painel"] .workspace, body[data-page="painel"] .test-panel { display: none; }
+    body[data-page="teste"] .hero, body[data-page="teste"] .section-head, body[data-page="teste"] .workspace, body[data-page="teste"] .dashboard { display: none; }
+    footer { max-width: 1200px; margin: auto; padding: 0 32px 28px; display: flex; justify-content: space-between; color: #80908b; font-size: 11px; }
+    @media (max-width: 800px) { header { padding: 20px 22px; } main { padding: 26px 22px 58px; } .hero { grid-template-columns: 1fr; gap: 10px; } .visual { min-height: 320px; } .visual:before { width: 300px; } .visual:after { width: 240px; height: 240px; } .cross { width: 175px; height: 175px; border-radius: 42px; } .cross svg { width: 90px; height: 90px; } .section-head { margin-top: 52px; align-items: flex-start; flex-direction: column; } .workspace { grid-template-columns: 1fr; } .info-panel { padding: 27px; } .benefits { grid-template-columns: 1fr 1fr; } .form-panel { padding: 0 27px 29px; } }
+    @media (max-width: 520px) { .top-note { display: none; } h1 { font-size: 44px; } .intro { font-size: 15px; } .visual { min-height: 285px; } .float-card.one { left: -4px; top: 30px; } .float-card.two { right: -3px; bottom: 35px; } .benefits { grid-template-columns: 1fr; } .fields { grid-template-columns: 1fr; } .field.full { grid-column: auto; } .form-panel { padding-right: 20px; padding-left: 20px; } footer { padding-right: 22px; padding-left: 22px; gap: 10px; flex-wrap: wrap; } }
+    @media (max-width: 800px) { .dashboard { padding: 21px; } .stats { grid-template-columns: 1fr 1fr; } .dash-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 520px) { .dash-heading { flex-direction: column; } .stats { gap: 9px; } .stat { padding: 13px; min-height: 92px; } .stat-value { font-size: 25px; } .chat-form { flex-direction: column; } .chat-form button { height: 42px; } }
+    @media (prefers-reduced-motion: reduce) { .record-item { transition: none; } .record-item:hover { transform: none; } }
+  </style>
+</head>
+<body data-page="cadastro">
+  <div class="shell">
+    <header>
+      <a class="brand" href="#inicio" aria-label="VittaCare, início">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>
+        VittaCare
+      </a>
+      <span class="top-note">Tecnologia a serviço do cuidado</span>
+    </header>
+
+    <main id="inicio">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <span class="eyebrow">Cuidado conectado</span>
+          <h1 id="hero-title">Mais tempo para o que <em>importa.</em></h1>
+          <p class="intro">Uma plataforma para aproximar profissionais, hospitais e pacientes. Organize informações e acompanhe o cuidado com mais clareza em cada etapa.</p>
+          <div class="access-note">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z" stroke="#0e493f" stroke-width="1.7"/><path d="m8.5 12 2.2 2.2 4.8-5" stroke="#0e493f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><strong>Acesso profissional</strong><br>O cadastro é destinado a profissionais registrados no CRM ou no COREN. O número de registro será solicitado para validação.</div>
+          </div>
+        </div>
+        <div class="visual" aria-hidden="true">
+          <div class="cross"><svg viewBox="0 0 120 120" fill="none"><path d="M60 20v80M20 60h80" stroke="currentColor" stroke-width="16" stroke-linecap="round"/><circle cx="60" cy="60" r="46" stroke="currentColor" stroke-opacity=".27" stroke-width="2"/></svg></div>
+          <div class="float-card one"><span class="mini-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h4l2-6 4 12 2-6h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Cuidado em foco<small>Informações organizadas</small></span></div>
+          <div class="float-card two"><span class="mini-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6m3-3h-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span>Equipe conectada<small>Colaboração profissional</small></span></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="access-title">
+        <div class="section-head">
+          <div><span class="eyebrow">Comece por aqui</span><h2 id="access-title">Seu espaço de cuidado</h2></div>
+          <p>Crie sua conta profissional ou acesse seu perfil.</p>
+        </div>
+        <div class="workspace">
+          <aside class="info-panel">
+            <h3>Feito para simplificar a rotina</h3>
+            <p>O VittaCare ajuda a centralizar o fluxo de informações para que equipes possam se organizar e dedicar mais atenção ao atendimento.</p>
+            <div class="benefits">
+              <div class="benefit"><span class="mini-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong>Informações reunidas</strong><span>Consulte dados e atividades em um só lugar.</span></div></div>
+              <div class="benefit"><span class="mini-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/><circle cx="17" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M16 15a5 5 0 0 1 5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><strong>Equipe alinhada</strong><span>Facilite a comunicação entre profissionais.</span></div></div>
+              <div class="benefit"><span class="mini-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/></svg></span><div><strong>Foco no atendimento</strong><span>Mais clareza para apoiar a jornada de cuidado.</span></div></div>
+            </div>
+          </aside>
+          <div class="form-panel">
+            <div class="tabs" role="tablist" aria-label="Acesso à plataforma">
+              <button class="tab" id="tab-cadastro" role="tab" aria-selected="true" aria-controls="painel-cadastro">Cadastro</button>
+              <button class="tab" id="tab-entrar" role="tab" aria-selected="false" aria-controls="painel-entrar" tabindex="-1">Entrar</button>
+              <button class="tab" id="tab-sobre" role="tab" aria-selected="false" aria-controls="painel-sobre" tabindex="-1">Como funciona</button>
+            </div>
+            <section class="tab-panel" id="painel-cadastro" role="tabpanel" aria-labelledby="tab-cadastro">
+              <h3>Crie sua conta profissional</h3>
+              <p class="form-lead">Informe seus dados e selecione seu conselho profissional. Após concluir o cadastro, você poderá seguir para o login.</p>
+              <form id="signup-form">
+                <div class="fields">
+                  <div class="field full"><label for="nome">Nome completo</label><input id="nome" name="nome" autocomplete="name" placeholder="Seu nome" required></div>
+                  <div class="field full"><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required></div>
+                  <div class="field full"><label for="endereco">Endereço</label><input id="endereco" name="endereco" autocomplete="street-address" placeholder="Rua, número, bairro e cidade" required></div>
+                  <div class="field"><label for="idade">Idade</label><input id="idade" name="idade" type="number" min="18" max="120" inputmode="numeric" placeholder="Sua idade" required></div>
+                  <div class="field"><label for="sexo">Sexo</label><select id="sexo" name="sexo" required><option value="" disabled selected>Selecione</option><option value="feminino">Feminino</option><option value="masculino">Masculino</option><option value="outro">Outro</option><option value="prefiro-nao-informar">Prefiro não informar</option></select></div>
+                  <div class="field"><label for="registro-tipo">Conselho profissional</label><select id="registro-tipo" name="registro-tipo" required><option value="" disabled selected>Selecione</option><option value="CRM">CRM</option><option value="COREN">COREN</option></select></div>
+                  <div class="field"><label for="registro-numero">Número do registro</label><input id="registro-numero" name="registro-numero" placeholder="Número do CRM ou COREN" required></div>
+                  <div class="field full"><label for="senha">Senha</label><input id="senha" name="senha" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo de 8 caracteres" required></div>
+                </div>
+                <label class="terms"><input type="checkbox" required><span>Declaro que as informações são verdadeiras e concordo com os termos de uso e a política de privacidade.</span></label>
+                <button class="primary" type="submit">Solicitar cadastro</button>
+                <div class="notice" id="form-notice" role="status">Cadastro demonstrativo: conecte este formulário ao serviço de autenticação para validar o registro e criar a conta.</div>
+              </form>
+              <p class="login-prompt">Já tem uma conta? <button type="button" class="text-button" data-open-tab="tab-entrar">Entrar</button></p>
+            </section>
+            <section class="tab-panel" id="painel-entrar" role="tabpanel" aria-labelledby="tab-entrar" hidden>
+              <div class="login-emblem" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+              <h3>Bem-vindo de volta</h3><p class="form-lead">Acesse seu espaço profissional com segurança.</p>
+              <form id="login-form"><div class="fields"><div class="field full"><label for="login-email">E-mail profissional</label><input id="login-email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required></div><div class="field full"><label for="login-senha">Senha</label><input id="login-senha" type="password" autocomplete="current-password" placeholder="Digite sua senha" required></div></div><button class="primary" style="margin-top:21px" type="submit">Entrar na plataforma</button><div class="notice" id="login-notice" role="status">Acesso demonstrativo: conecte este formulário ao serviço de autenticação.</div></form>
+              <div class="login-security"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z" stroke="currentColor" stroke-width="1.7"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Acesso exclusivo para profissionais com CRM ou COREN.</div>
+              <p class="login-prompt">Ainda não tem conta? <button type="button" class="text-button" data-open-tab="tab-cadastro">Faça seu cadastro</button></p>
+            </section>
+            <section class="tab-panel" id="painel-sobre" role="tabpanel" aria-labelledby="tab-sobre" hidden>
+              <h3>Uma plataforma para apoiar o cuidado</h3>
+              <div class="about-copy"><p>O VittaCare foi pensado para ajudar profissionais e equipes hospitalares a <strong>organizar informações, acompanhar atividades e colaborar</strong> ao longo da jornada de atendimento.</p><p>O acesso é profissional e requer cadastro ativo no <strong>CRM ou no COREN</strong>. No cadastro, informe seu conselho, número e estado de registro. A confirmação da conta depende da integração com um serviço de validação.</p><p>Depois de entrar, a equipe pode usar a plataforma para consultar informações disponíveis e coordenar o trabalho de forma mais clara. Os recursos finais dependem da configuração adotada pelo hospital.</p></div>
+              <button type="button" class="primary" data-open-tab="tab-cadastro">Criar conta profissional</button>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <nav class="page-tabs" aria-label="Seções do aplicativo">
+        <button class="page-tab" type="button" data-page="cadastro" aria-current="page">1. Cadastro</button>
+        <button class="page-tab" type="button" data-page="login">2. Login</button>
+        <button class="page-tab" type="button" data-page="informacoes">Informações</button>
+        <button class="page-tab" type="button" data-page="painel">Painel hospitalar</button>
+        <button class="page-tab" type="button" data-page="teste">Teste</button>
+      </nav>
+
+      <section class="test-panel" id="painel-teste" aria-labelledby="test-title" hidden>
+        <span class="eyebrow">Ambiente demonstrativo</span>
+        <h2 id="test-title">Teste do aplicativo</h2>
+        <p class="form-lead">Explore o painel hospitalar com informações fictícias sobre pacientes, leitos e salas cirúrgicas. Nenhum dado real é enviado ou armazenado.</p>
+        <button class="primary" type="button" id="open-dashboard">Visualizar painel fictício</button>
+        <p class="demo-note">O login e o envio de mensagens são apenas demonstrações. Para uso real, é necessário conectar a aplicação a autenticação e aos sistemas do hospital.</p>
+      </section>
+
+      <section class="dashboard" aria-labelledby="dashboard-title">
+        <div class="dash-heading">
+          <div><span class="eyebrow">Visão hospitalar</span><h2 id="dashboard-title">Painel da equipe</h2><p>Acompanhe pacientes, ocupação e atividade cirúrgica.</p><span class="demo-stamp">Demonstração · aberta às <time id="dashboard-time"></time></span></div>
+          <div style="display:flex;align-items:center;gap:9px"><span class="live-label">Dados fictícios</span><button class="logout-button" id="logout-button" type="button">Sair</button></div>
+        </div>
+        <div class="stats" aria-label="Resumo do hospital">
+          <div class="stat urgent"><div class="stat-label">Pacientes em estado grave</div><div class="stat-value">3 <small>pacientes</small></div></div>
+          <div class="stat"><div class="stat-label">Leitos ocupados</div><div class="stat-value">72 <small>/ 100</small></div></div>
+          <div class="stat"><div class="stat-label">Leitos disponíveis</div><div class="stat-value">28 <small>/ 100</small></div></div>
+          <div class="stat"><div class="stat-label">Salas cirúrgicas ocupadas</div><div class="stat-value">6 <small>/ 10</small></div></div>
+        </div>
+        <div class="dash-grid">
+          <section class="dash-card" aria-labelledby="patients-title">
+            <div class="card-heading"><h3 id="patients-title">Pacientes em estado grave</h3><span>3 pacientes</span></div>
+            <div class="patient-row"><div><div class="patient-name">Paciente A <span class="severity">Grave</span></div><div class="patient-meta">UTI Adulto · Leito 04 · Atualizado há 8 min</div></div><button class="record-link" type="button" data-record="a">Ver prontuário</button></div>
+            <div class="patient-row"><div><div class="patient-name">Paciente B <span class="severity">Grave</span></div><div class="patient-meta">UTI Adulto · Leito 09 · Atualizado há 15 min</div></div><button class="record-link" type="button" data-record="b">Ver prontuário</button></div>
+            <div class="patient-row"><div><div class="patient-name">Paciente C <span class="severity">Grave</span></div><div class="patient-meta">UTI Pediátrica · Leito 02 · Atualizado há 21 min</div></div><button class="record-link" type="button" data-record="c">Ver prontuário</button></div>
+          </section>
+          <section class="dash-card" aria-labelledby="surgery-title">
+            <div class="card-heading"><h3 id="surgery-title">Salas de cirurgia</h3><span>10 salas no total</span></div>
+            <div class="surgery-tabs" aria-label="Salas e reservas">
+              <button class="surgery-tab" type="button" data-surgery-tab="rooms" aria-pressed="true">Salas</button>
+              <button class="surgery-tab" type="button" data-surgery-tab="reserve" aria-pressed="false">Reservar cirurgia</button>
+            </div>
+            <div id="surgery-rooms-view">
+              <div class="room-row"><span>Sala 01 · Cirurgia geral</span><span class="room-state">Ocupada</span></div>
+              <div class="room-row"><span>Sala 02 · Ortopedia</span><span class="room-state">Ocupada</span></div>
+              <div class="room-row"><span>Sala 03 · Cardiologia</span><span class="room-state">Ocupada</span></div>
+              <div class="room-row"><span>Salas 04 a 06</span><span class="room-state">Ocupadas</span></div>
+              <div class="room-row"><span>Salas 07 a 10</span><span class="room-state free">Disponíveis</span></div>
+            </div>
+            <div id="surgery-reserve-view" hidden>
+              <form class="reservation-form" id="reservation-form">
+                <div class="fields">
+                  <div class="field full"><label for="patient-name">Nome do paciente</label><input id="patient-name" name="patient-name" placeholder="Nome completo" required></div>
+                  <div class="field"><label for="patient-record">Número do prontuário</label><input id="patient-record" name="patient-record" placeholder="Identificação" required></div>
+                  <div class="field"><label for="procedure">Procedimento</label><input id="procedure" name="procedure" placeholder="Procedimento previsto" required></div>
+                  <div class="field full"><label for="responsible-doctor">Médico responsável</label><input id="responsible-doctor" name="responsible-doctor" placeholder="Nome do médico responsável" required></div>
+                  <div class="field"><label for="surgery-room">Sala disponível</label><select id="surgery-room" name="surgery-room" required><option value="" disabled selected>Selecione a sala</option><option value="07">Sala 07</option><option value="08">Sala 08</option><option value="09">Sala 09</option><option value="10">Sala 10</option></select></div>
+                  <div class="field"><label for="surgery-date">Data</label><input id="surgery-date" name="surgery-date" type="date" required></div>
+                  <div class="field full"><label for="surgery-time">Horário</label><input id="surgery-time" name="surgery-time" type="time" required></div>
+                </div>
+                <button class="primary" type="submit">Confirmar reserva demonstrativa</button>
+                <div class="notice" id="reservation-notice" role="status"></div>
+                <p class="demo-note">A reserva é temporária e só aparece nesta sessão. Não informe dados reais de pacientes nesta demonstração.</p>
+              </form>
+              <div class="reservation-list" id="reservation-list" aria-live="polite"></div>
+            </div>
+          </section>
+        </div>
+        <section class="chat-box" aria-labelledby="chat-title">
+          <h3 id="chat-title">Comunicação da equipe</h3>
+          <p>Envie uma atualização para os profissionais da equipe.</p>
+          <div class="chat-warning">Demonstração sem conexão hospitalar. Não inclua nomes, diagnósticos ou outros dados reais de pacientes.</div>
+          <ul class="chat-messages" id="chat-messages" aria-live="polite"></ul>
+          <form class="chat-form" id="chat-form"><input id="chat-message" aria-label="Mensagem para a equipe" placeholder="Escreva uma mensagem para a equipe..." required><button type="submit">Enviar mensagem</button></form>
+          <div class="chat-notice" id="chat-notice" role="status">Mensagem demonstrativa registrada nesta tela.</div>
+        </section>
+        <p class="demo-note">Dados fictícios para demonstração da interface. Prontuários, contagens, disponibilidade das salas e mensagens precisam ser conectados ao sistema hospitalar para exibir informações reais e atualizadas.</p>
+      </section>
+      <dialog class="record-dialog" id="record-dialog" aria-labelledby="record-title">
+        <div class="record-dialog-head"><div><span class="eyebrow">Prontuário demonstrativo</span><h2 id="record-title">Paciente</h2></div><button class="record-close" type="button" aria-label="Fechar prontuário">×</button></div>
+        <div class="record-content" id="record-content"></div>
+        <p class="demo-note">Dados fictícios para demonstração. Prontuários reais exigem acesso autorizado, armazenamento seguro e integração com o sistema hospitalar.</p>
+      </dialog>
+    </main>
+    <footer><span>© 2026 VittaCare</span><span>Uma proposta de cuidado conectado</span></footer>
+  </div>
+  <script>
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    const pageTabs = [...document.querySelectorAll('.page-tab')];
+    let registeredAccount = null;
+    try {
+      const savedAccount = JSON.parse(sessionStorage.getItem('vittacare-demo-account') || 'null');
+      if (savedAccount?.email && savedAccount?.salt && savedAccount?.digest) {
+        registeredAccount = { email: savedAccount.email, salt: new Uint8Array(savedAccount.salt), digest: savedAccount.digest };
+      }
+    } catch { sessionStorage.removeItem('vittacare-demo-account'); }
+    let authenticated = false;
+    async function passwordDigest(password, salt) {
+      const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 120000, hash: 'SHA-256' }, key, 256);
+      return [...new Uint8Array(bits)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+    function showPage(page, demoPreview = false) {
+      if (page === 'painel' && !authenticated && !demoPreview) {
+        if (registeredAccount) {
+          const notice = document.getElementById('login-notice');
+          notice.textContent = 'Para abrir o painel, entre com o e-mail e a senha usados no cadastro desta sessão.';
+          notice.classList.add('show');
+          page = 'login';
+        } else {
+          const notice = document.getElementById('form-notice');
+          notice.textContent = 'Para abrir o painel hospitalar, faça seu cadastro primeiro e depois entre com seu e-mail e senha.';
+          notice.classList.add('show');
+          page = 'cadastro';
+        }
+      }
+      document.body.dataset.page = page;
+      pageTabs.forEach(tab => {
+        if (tab.dataset.page === page) tab.setAttribute('aria-current', 'page');
+        else tab.removeAttribute('aria-current');
+      });
+      const nested = { login: 'tab-entrar', cadastro: 'tab-cadastro', informacoes: 'tab-sobre' }[page];
+      if (nested) activateTab(nested);
+      document.getElementById('painel-teste').hidden = page !== 'teste';
+    }
+    pageTabs.forEach(tab => tab.addEventListener('click', () => showPage(tab.dataset.page)));
+    document.getElementById('open-dashboard').addEventListener('click', () => showPage('painel', true));
+    function activateTab(id) {
+      tabs.forEach(tab => {
+        const active = tab.id === id;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        document.getElementById(tab.getAttribute('aria-controls')).hidden = !active;
+      });
+      document.getElementById(id).focus();
+    }
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => activateTab(tab.id));
+      tab.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        activateTab(tabs[next].id);
+      });
+    });
+    document.querySelectorAll('[data-open-tab]').forEach(button => button.addEventListener('click', () => activateTab(button.dataset.openTab)));
+    document.getElementById('signup-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('senha').value;
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const digest = await passwordDigest(password, salt);
+      registeredAccount = { email, salt, digest };
+      sessionStorage.setItem('vittacare-demo-account', JSON.stringify({ email, salt: [...salt], digest }));
+      document.getElementById('login-email').value = email;
+      document.getElementById('senha').value = '';
+      const loginNotice = document.getElementById('login-notice');
+      loginNotice.textContent = 'Cadastro demonstrativo concluído. Entre com o e-mail e a senha que acabou de cadastrar.';
+      loginNotice.classList.add('show');
+      showPage('login');
+    });
+    document.getElementById('login-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const loginNotice = document.getElementById('login-notice');
+      if (!registeredAccount) {
+        loginNotice.textContent = 'Faça seu cadastro antes de entrar.';
+        loginNotice.classList.add('show');
+        showPage('cadastro');
+        return;
+      }
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      const password = document.getElementById('login-senha').value;
+      const digest = await passwordDigest(password, registeredAccount.salt);
+      if (email !== registeredAccount.email || digest !== registeredAccount.digest) {
+        loginNotice.textContent = 'E-mail ou senha incorretos. Confira os dados e tente novamente.';
+        loginNotice.classList.add('show');
+        return;
+      }
+      authenticated = true;
+      document.getElementById('login-senha').value = '';
+      loginNotice.textContent = 'Acesso demonstrativo autenticado.';
+      loginNotice.classList.add('show');
+      showPage('painel');
+    });
+    document.getElementById('logout-button').addEventListener('click', () => {
+      authenticated = false;
+      document.getElementById('login-notice').textContent = 'Você saiu da demonstração.';
+      document.getElementById('login-notice').classList.add('show');
+      showPage('login');
+    });
+    document.getElementById('chat-form').addEventListener('submit', event => {
+      event.preventDefault();
+      const value = document.getElementById('chat-message').value.trim();
+      if (!value) return;
+      const message = document.createElement('li');
+      message.className = 'chat-message';
+      const body = document.createElement('span');
+      body.textContent = value;
+      const time = document.createElement('time');
+      time.dateTime = new Date().toISOString();
+      time.textContent = `Profissional da demonstração · ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date())}`;
+      message.append(body, time);
+      document.getElementById('chat-messages').prepend(message);
+      document.getElementById('chat-notice').textContent = 'Mensagem exibida somente nesta demonstração; ela não foi enviada à equipe.';
+      document.getElementById('chat-notice').classList.add('show');
+      document.getElementById('chat-message').value = '';
+    });
+    document.getElementById('dashboard-time').textContent = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date());
+    const observationDrafts = Object.create(null);
+    const surgeryReservations = [];
+    document.querySelectorAll('[data-surgery-tab]').forEach(button => button.addEventListener('click', () => {
+      const reserving = button.dataset.surgeryTab === 'reserve';
+      document.getElementById('surgery-rooms-view').hidden = reserving;
+      document.getElementById('surgery-reserve-view').hidden = !reserving;
+      document.querySelectorAll('[data-surgery-tab]').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
+    }));
+    const surgeryDate = document.getElementById('surgery-date');
+    const now = new Date();
+    surgeryDate.min = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    document.getElementById('reservation-form').addEventListener('submit', event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const reservation = {
+        patient: document.getElementById('patient-name').value.trim(),
+        record: document.getElementById('patient-record').value.trim(),
+        procedure: document.getElementById('procedure').value.trim(),
+        doctor: document.getElementById('responsible-doctor').value.trim(),
+        room: document.getElementById('surgery-room').value,
+        date: surgeryDate.value,
+        time: document.getElementById('surgery-time').value
+      };
+      const notice = document.getElementById('reservation-notice');
+      if (new Date(`${reservation.date}T${reservation.time}`) < new Date()) {
+        notice.textContent = 'Escolha uma data e horário futuros.';
+        notice.classList.add('show');
+        return;
+      }
+      const duplicate = surgeryReservations.some(item => item.room === reservation.room && item.date === reservation.date && item.time === reservation.time);
+      if (duplicate) {
+        notice.textContent = 'Já existe uma reserva demonstrativa para esta sala neste horário.';
+        notice.classList.add('show');
+        return;
+      }
+      surgeryReservations.push(reservation);
+      notice.classList.remove('show');
+      const card = document.createElement('article');
+      card.className = 'reservation-confirmation';
+      card.textContent = `${reservation.room} · ${reservation.date} às ${reservation.time} — ${reservation.procedure}; paciente ${reservation.patient} (prontuário ${reservation.record}); médico responsável: ${reservation.doctor}.`;
+      document.getElementById('reservation-list').prepend(card);
+      form.reset();
+    });
+    const patientRecords = {
+        a: { title: 'Paciente A', values: [
+        ['Identificação', 'Registro demonstrativo A-104'], ['Dados do paciente', 'Adulto · sexo feminino · nascimento: 14/03/1978'], ['Internação', 'UTI Adulto · Leito 04 · desde 08/10/2026 às 16:20'], ['Diagnóstico / condição', 'Exemplo fictício: acompanhamento intensivo pós-operatório'], ['Alergias', 'Não informado no exemplo'], ['Medicações em uso', 'Medicamento de exemplo A (fictício) · dose: conforme prescrição · via: conforme prescrição · horários: conforme prescrição · prescritor: Dr. Paulo Mendes (fictício) · prescrito em 08/10/2026 às 19:00 · última administração registrada: 09/10/2026 às 08:00'], ['Procedimentos realizados', 'Exemplo fictício: monitoramento contínuo · 08/10/2026 às 18:30'], ['Médico que prescreveu', 'Dr. Paulo Mendes — exemplo fictício'], ['Data e horário do registro', '09/10/2026 às 08:15'], ['Médico atendendo agora', 'Dra. Marina Costa — exemplo fictício'], ['Enfermeiro responsável', 'Enf. Júlia Santos — exemplo fictício'], ['Auxiliar de enfermagem', 'Aux. Carlos Lima — exemplo fictício'], ['Observações gerais', 'Exemplo: paciente em acompanhamento; equipe informada sobre alterações observadas.'] ] },
+        b: { title: 'Paciente B', values: [
+        ['Identificação', 'Registro demonstrativo B-209'], ['Dados do paciente', 'Adulto · sexo masculino · nascimento: 02/11/1965'], ['Internação', 'UTI Adulto · Leito 09 · desde 09/10/2026 às 02:10'], ['Diagnóstico / condição', 'Exemplo fictício: observação intensiva'], ['Alergias', 'Não informado no exemplo'], ['Medicações em uso', 'Medicamento de exemplo B (fictício) · dose: conforme prescrição · via: conforme prescrição · horários: conforme prescrição · prescritor: Dra. Ana Ribeiro (fictícia) · prescrito em 09/10/2026 às 03:00 · próxima administração: conforme prescrição'], ['Procedimentos realizados', 'Exemplo fictício: avaliação clínica · 09/10/2026 às 05:40'], ['Médico que prescreveu', 'Dra. Ana Ribeiro — exemplo fictício'], ['Data e horário do registro', '09/10/2026 às 07:55'], ['Médico atendendo agora', 'Dr. Rafael Nunes — exemplo fictício'], ['Enfermeiro responsável', 'Enf. Pedro Alves — exemplo fictício'], ['Auxiliar de enfermagem', 'Não designado no exemplo'], ['Observações gerais', 'Exemplo: manter acompanhamento e registrar novas informações no sistema assistencial.'] ] },
+        c: { title: 'Paciente C', values: [
+        ['Identificação', 'Registro demonstrativo C-302'], ['Dados do paciente', 'Pediátrico · sexo feminino · nascimento: 22/07/2018'], ['Internação', 'UTI Pediátrica · Leito 02 · desde 09/10/2026 às 00:45'], ['Diagnóstico / condição', 'Exemplo fictício: acompanhamento intensivo pediátrico'], ['Alergias', 'Não informado no exemplo'], ['Medicações em uso', 'Medicamento de exemplo C (fictício) · dose: conforme prescrição pediátrica · via: conforme prescrição · horários: conforme prescrição · prescritor: Dr. Lucas Freire (fictício) · prescrito em 09/10/2026 às 01:30 · última administração registrada: 09/10/2026 às 07:30'], ['Procedimentos realizados', 'Exemplo fictício: avaliação e monitoramento · 09/10/2026 às 06:00'], ['Médico que prescreveu', 'Dr. Lucas Freire — exemplo fictício'], ['Data e horário do registro', '09/10/2026 às 08:05'], ['Médico atendendo agora', 'Dra. Beatriz Rocha — exemplo fictício'], ['Enfermeiro responsável', 'Enf. Camila Souza — exemplo fictício'], ['Auxiliar de enfermagem', 'Aux. Renata Dias — exemplo fictício'], ['Observações gerais', 'Exemplo: comunicar atualizações à equipe responsável e ao acompanhante autorizado.'] ] }
+    };
+    const recordDialog = document.getElementById('record-dialog');
+    document.querySelectorAll('[data-record]').forEach(button => button.addEventListener('click', () => {
+      const record = patientRecords[button.dataset.record];
+      document.getElementById('record-title').textContent = record.title;
+      document.getElementById('record-content').innerHTML = '<dl class="record-grid">' + record.values.map(([label, value]) => label === 'Observações gerais' ? `<div class="record-item full"><dt>${label}</dt><dd><textarea class="record-observations" aria-label="Observações gerais do paciente"></textarea><button class="record-save" type="button">Salvar observação</button><span class="record-saved" role="status" style="display:none;margin-left:8px;color:#176b5b;font-size:11px"></span><span class="record-audit"></span></dd></div>` : `<div class="record-item${label === 'Medicações em uso' ? ' full' : ''}"><dt>${label}</dt><dd>${value}</dd></div>`).join('') + '</dl>';
+      const observations = document.querySelector('.record-observations');
+      const audit = document.querySelector('.record-audit');
+      observations.value = observationDrafts[button.dataset.record]?.text ?? record.values.find(([label]) => label === 'Observações gerais')[1];
+      if (observationDrafts[button.dataset.record]) audit.textContent = observationDrafts[button.dataset.record].audit;
+      document.querySelector('.record-save').addEventListener('click', () => {
+        const stamp = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date());
+        const auditText = `Rascunho salvo nesta sessão às ${stamp} · usuário demonstrativo`;
+        observationDrafts[button.dataset.record] = { text: observations.value, audit: auditText };
+        audit.textContent = auditText;
+      });
+      recordDialog.showModal();
+    }));
+    document.querySelector('.record-close').addEventListener('click', () => recordDialog.close());
+    recordDialog.addEventListener('click', event => { if (event.target === recordDialog) recordDialog.close(); });
+  </script>
+</body>
+</html>
