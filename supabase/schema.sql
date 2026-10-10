@@ -37,6 +37,33 @@ create table public.perfis (
   unique (conselho, uf_conselho, numero_conselho)
 );
 
+-- Cria o perfil junto com a conta, inclusive quando o Supabase exige confirmação de e-mail.
+create or replace function public.criar_perfil_novo_usuario()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  insert into public.perfis (
+    id, nome_completo, correio_eletronico, endereco, idade, sexo,
+    conselho, numero_conselho, versao_termos
+  ) values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'nome_completo', ''),
+    new.email,
+    new.raw_user_meta_data ->> 'endereco',
+    nullif(new.raw_user_meta_data ->> 'idade', '')::smallint,
+    nullif(new.raw_user_meta_data ->> 'sexo', '')::public.sexo_perfil,
+    nullif(new.raw_user_meta_data ->> 'conselho', '')::public.conselho_profissional,
+    coalesce(new.raw_user_meta_data ->> 'numero_conselho', ''),
+    coalesce(new.raw_user_meta_data ->> 'versao_termos', '1.0')
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists ao_criar_usuario_criar_perfil on auth.users;
+create trigger ao_criar_usuario_criar_perfil
+  after insert on auth.users
+  for each row execute function public.criar_perfil_novo_usuario();
+
 create table public.vinculos_hospitalares (
   hospital_id uuid not null references public.hospitais(id) on delete cascade,
   usuario_id uuid not null references public.perfis(id) on delete cascade,

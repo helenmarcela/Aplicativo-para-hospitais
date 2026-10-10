@@ -350,35 +350,31 @@
     </main>
     <footer><span>© 2026 VittaCare</span><span>Uma proposta de cuidado conectado</span></footer>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // Preencha com Project URL e chave publishable (anon) do Supabase. Nunca use service_role no navegador.
+    const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
+    const SUPABASE_ANON_KEY = 'SUA_CHAVE_PUBLISHABLE';
+    const supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let hospitalId = null;
+    const supabaseConfigured = supabase && !SUPABASE_URL.includes('SEU-PROJETO') && !SUPABASE_ANON_KEY.includes('SUA_CHAVE');
+    function showNotice(id, message) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.classList.add('show');
+    }
+    function requireSupabase(id) {
+      if (supabaseConfigured) return true;
+      showNotice(id, 'Configure SUPABASE_URL e SUPABASE_ANON_KEY no início do script para conectar ao Supabase.');
+      return false;
+    }
     const tabs = [...document.querySelectorAll('[role="tab"]')];
     const pageTabs = [...document.querySelectorAll('.page-tab')];
-    let registeredAccount = null;
-    try {
-      const savedAccount = JSON.parse(sessionStorage.getItem('vittacare-demo-account') || 'null');
-      if (savedAccount?.email && savedAccount?.salt && savedAccount?.digest) {
-        registeredAccount = { email: savedAccount.email, salt: new Uint8Array(savedAccount.salt), digest: savedAccount.digest };
-      }
-    } catch { sessionStorage.removeItem('vittacare-demo-account'); }
     let authenticated = false;
-    async function passwordDigest(password, salt) {
-      const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-      const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 120000, hash: 'SHA-256' }, key, 256);
-      return [...new Uint8Array(bits)].map(byte => byte.toString(16).padStart(2, '0')).join('');
-    }
     function showPage(page, demoPreview = false) {
       if (page === 'painel' && !authenticated && !demoPreview) {
-        if (registeredAccount) {
-          const notice = document.getElementById('login-notice');
-          notice.textContent = 'Para abrir o painel, entre com o e-mail e a senha usados no cadastro desta sessão.';
-          notice.classList.add('show');
-          page = 'login';
-        } else {
-          const notice = document.getElementById('form-notice');
-          notice.textContent = 'Para abrir o painel hospitalar, faça seu cadastro primeiro e depois entre com seu e-mail e senha.';
-          notice.classList.add('show');
-          page = 'cadastro';
-        }
+        showNotice('login-notice', 'Entre com sua conta Supabase para abrir o painel.');
+        page = 'login';
       }
       document.body.dataset.page = page;
       pageTabs.forEach(tab => {
@@ -412,63 +408,80 @@
     document.querySelectorAll('[data-open-tab]').forEach(button => button.addEventListener('click', () => activateTab(button.dataset.openTab)));
     document.getElementById('signup-form').addEventListener('submit', async event => {
       event.preventDefault();
+      if (!requireSupabase('form-notice')) return;
       const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('senha').value;
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const digest = await passwordDigest(password, salt);
-      registeredAccount = { email, salt, digest };
-      sessionStorage.setItem('vittacare-demo-account', JSON.stringify({ email, salt: [...salt], digest }));
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { data: {
+        nome_completo: document.getElementById('nome').value.trim(),
+        endereco: document.getElementById('endereco').value.trim(),
+        idade: Number(document.getElementById('idade').value),
+        sexo: document.getElementById('sexo').value,
+        conselho: document.getElementById('registro-tipo').value,
+        numero_conselho: document.getElementById('registro-numero').value.trim(),
+        versao_termos: '1.0'
+      } } });
+      if (error) return showNotice('form-notice', error.message);
       document.getElementById('login-email').value = email;
       document.getElementById('senha').value = '';
-      const loginNotice = document.getElementById('login-notice');
-      loginNotice.textContent = 'Cadastro demonstrativo concluído. Entre com o e-mail e a senha que acabou de cadastrar.';
-      loginNotice.classList.add('show');
+      showNotice('form-notice', data.session ? 'Conta criada e perfil salvo.' : 'Conta criada. Confirme seu e-mail e depois entre.');
       showPage('login');
     });
     document.getElementById('login-form').addEventListener('submit', async event => {
       event.preventDefault();
       const loginNotice = document.getElementById('login-notice');
-      if (!registeredAccount) {
-        loginNotice.textContent = 'Faça seu cadastro antes de entrar.';
-        loginNotice.classList.add('show');
-        showPage('cadastro');
-        return;
-      }
+      if (!requireSupabase('login-notice')) return;
       const email = document.getElementById('login-email').value.trim().toLowerCase();
       const password = document.getElementById('login-senha').value;
-      const digest = await passwordDigest(password, registeredAccount.salt);
-      if (email !== registeredAccount.email || digest !== registeredAccount.digest) {
-        loginNotice.textContent = 'E-mail ou senha incorretos. Confira os dados e tente novamente.';
-        loginNotice.classList.add('show');
-        return;
-      }
-      authenticated = true;
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return showNotice('login-notice', error.message);
       document.getElementById('login-senha').value = '';
-      loginNotice.textContent = 'Acesso demonstrativo autenticado.';
-      loginNotice.classList.add('show');
+      await loadHospitalContext();
       showPage('painel');
     });
-    document.getElementById('logout-button').addEventListener('click', () => {
+    async function loadHospitalContext() {
+      const { data: { user } } = await supabase.auth.getUser();
+      authenticated = Boolean(user);
+      if (!user) return;
+      const { data: memberships, error } = await supabase.from('vinculos_hospitalares').select('hospital_id, ativo').eq('usuario_id', user.id).eq('ativo', true);
+      if (error) return showNotice('login-notice', error.message);
+      hospitalId = memberships?.[0]?.hospital_id ?? null;
+      if (hospitalId) await loadMessages();
+      else showNotice('chat-notice', 'Conta autenticada sem vínculo hospitalar ativo. Solicite o vínculo ao administrador do hospital.');
+    }
+    async function loadMessages() {
+      if (!hospitalId) return;
+      const { data, error } = await supabase.from('mensagens_equipe').select('mensagem, criado_em, autor_id').eq('hospital_id', hospitalId).order('criado_em', { ascending: false }).limit(50);
+      if (error) return showNotice('chat-notice', error.message);
+      const list = document.getElementById('chat-messages');
+      list.replaceChildren();
+      for (const row of data ?? []) {
+        const item = document.createElement('li'); item.className = 'chat-message';
+        const body = document.createElement('span'); body.textContent = row.mensagem;
+        const time = document.createElement('time'); time.dateTime = row.criado_em;
+        time.textContent = `${row.autor_id === (await supabase.auth.getUser()).data.user?.id ? 'Você' : 'Equipe'} · ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(row.criado_em))}`;
+        item.append(body, time); list.append(item);
+      }
+    }
+    if (supabaseConfigured) supabase.auth.getSession().then(({ data }) => { if (data.session) loadHospitalContext(); });
+    document.getElementById('logout-button').addEventListener('click', async () => {
+      if (supabaseConfigured) await supabase.auth.signOut();
       authenticated = false;
+      hospitalId = null;
       document.getElementById('login-notice').textContent = 'Você saiu da demonstração.';
       document.getElementById('login-notice').classList.add('show');
       showPage('login');
     });
-    document.getElementById('chat-form').addEventListener('submit', event => {
+    document.getElementById('chat-form').addEventListener('submit', async event => {
       event.preventDefault();
+      if (!requireSupabase('chat-notice')) return;
+      if (!authenticated || !hospitalId) return showNotice('chat-notice', 'Faça login e confirme que sua conta tem vínculo ativo com um hospital.');
       const value = document.getElementById('chat-message').value.trim();
       if (!value) return;
-      const message = document.createElement('li');
-      message.className = 'chat-message';
-      const body = document.createElement('span');
-      body.textContent = value;
-      const time = document.createElement('time');
-      time.dateTime = new Date().toISOString();
-      time.textContent = `Profissional da demonstração · ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date())}`;
-      message.append(body, time);
-      document.getElementById('chat-messages').prepend(message);
-      document.getElementById('chat-notice').textContent = 'Mensagem exibida somente nesta demonstração; ela não foi enviada à equipe.';
-      document.getElementById('chat-notice').classList.add('show');
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from('mensagens_equipe').insert({ hospital_id: hospitalId, autor_id: user.id, mensagem: value });
+      if (error) return showNotice('chat-notice', error.message);
+      await loadMessages();
+      showNotice('chat-notice', 'Mensagem enviada à equipe.');
       document.getElementById('chat-message').value = '';
     });
     document.getElementById('dashboard-time').textContent = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date());
